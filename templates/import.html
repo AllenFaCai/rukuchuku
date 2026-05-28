@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}数据导入{% endblock %}
+{% block breadcrumb %}数据导入{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card-custom">
+      <div class="card-header-custom"><h6><i class="fas fa-file-import me-2 text-primary"></i>Excel 数据导入</h6></div>
+      <div class="card-body-custom">
+        <div class="p-3 mb-4" style="background:#eff6ff;border-radius:10px;border-left:4px solid #3b82f6">
+          <h6 style="color:#3b82f6;font-size:.9rem"><i class="fas fa-info-circle me-1"></i>导入说明</h6>
+          <ul style="font-size:.85rem;color:#475569;margin:0;padding-left:1.2rem">
+            <li>支持 <code>.xlsx</code> 和 <code>.xls</code> 格式</li>
+            <li>自动识别表头：条码/19码、货号、商品名称、品牌、尺码、库存数量、备注</li>
+            <li>已有条码自动更新，新条码自动添加</li>
+            <li>支持多 Sheet 导入</li>
+          </ul>
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+          <div class="text-center p-5" style="border:2px dashed #cbd5e1;border-radius:12px;background:#f8fafc">
+            <i class="fas fa-cloud-upload-alt" style="font-size:3rem;color:#94a3b8;margin-bottom:1rem;display:block"></i>
+            <h5 style="color:#475569">选择 Excel 文件</h5>
+            <p class="text-muted" style="font-size:.85rem">支持 .xlsx / .xls 格式</p>
+            <input type="file" name="file" accept=".xlsx,.xls" class="form-control mt-3" style="max-width:400px;margin:0 auto;border-radius:8px" required>
+            <button type="submit" class="btn btn-primary mt-3" style="border-radius:10px;padding:.6rem 2rem"><i class="fas fa-upload me-2"></i>开始导入</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="row g-3 mt-3">
+      <div class="col-md-6">
+        <div class="card-custom"><div class="card-body-custom text-center">
+          <i class="fas fa-download text-primary" style="font-size:2rem;margin-bottom:.5rem;display:block"></i>
+          <h6>导出数据</h6><p class="text-muted" style="font-size:.85rem">将当前数据导出为 Excel</p>
+          <a href="/export" class="btn btn-outline-primary btn-sm" style="border-radius:8px"><i class="fas fa-file-export me-1"></i>导出 Excel</a>
+        </div></div>
+      </div>
+      <div class="col-md-6">
+        <div class="card-custom"><div class="card-body-custom text-center">
+          <i class="fas fa-history text-success" style="font-size:2rem;margin-bottom:.5rem;display:block"></i>
+          <h6>查看日志</h6><p class="text-muted" style="font-size:.85rem">查看所有操作记录</p>
+          <a href="/logs" class="btn btn-outline-success btn-sm" style="border-radius:8px"><i class="fas fa-clock-rotate-left me-1"></i>查看日志</a>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

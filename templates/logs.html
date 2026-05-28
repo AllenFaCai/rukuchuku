@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}操作日志{% endblock %}
+{% block breadcrumb %}操作日志{% endblock %}
+{% block content %}
+<div class="card-custom">
+  <div class="card-header-custom">
+    <h6><i class="fas fa-clock-rotate-left me-2 text-primary"></i>操作日志 <span class="text-muted fw-normal">({{ total }})</span></h6>
+    <a href="/export" class="btn btn-sm btn-outline-success"><i class="fas fa-download me-1"></i>导出</a>
+  </div>
+  <div class="card-body-custom">
+    <form class="row g-2 mb-3" method="GET">
+      <div class="col-md-3"><input type="text" name="search" class="form-control" placeholder="搜索条码/货号/名称..." value="{{ search }}" style="border-radius:8px"></div>
+      <div class="col-md-2">
+        <select name="op_type" class="form-select" style="border-radius:8px">
+          <option value="">全部类型</option>
+          <option>入库</option><option>手动入库</option><option>出库</option><option>库存调整</option>
+        </select>
+      </div>
+      <div class="col-md-2"><input type="date" name="start_date" class="form-control" value="{{ start_date }}" style="border-radius:8px"></div>
+      <div class="col-md-2"><input type="date" name="end_date" class="form-control" value="{{ end_date }}" style="border-radius:8px"></div>
+      <div class="col-md-1"><button type="submit" class="btn btn-outline-primary w-100" style="border-radius:8px"><i class="fas fa-filter"></i></button></div>
+      <div class="col-md-2"><a href="/logs" class="btn btn-outline-secondary w-100" style="border-radius:8px"><i class="fas fa-rotate-left me-1"></i>重置</a></div>
+    </form>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-custom">
+      <thead><tr><th>时间</th><th>条码</th><th>货号</th><th>商品</th><th>类型</th><th>变动</th><th>库存变化</th><th>状态</th><th>备注</th></tr></thead>
+      <tbody>
+      {% if items %}
+      {% for item in items %}
+      <tr>
+        <td class="text-muted" style="font-size:.8rem;white-space:nowrap">{{ item.created_at }}</td>
+        <td><code>{{ item.barcode }}</code></td>
+        <td>{{ item.sku }}</td>
+        <td>{{ item.product_name }}</td>
+        <td>
+          {% if item.operation_type == '入库' %}<span class="badge bg-success-subtle text-success">入库</span>{% endif %}
+          {% if item.operation_type == '手动入库' %}<span class="badge bg-success-subtle text-success">手动入库</span>{% endif %}
+          {% if item.operation_type == '出库' %}<span class="badge bg-warning-subtle text-warning">出库</span>{% endif %}
+          {% if item.operation_type == '库存调整' %}<span class="badge bg-info-subtle text-info">调整</span>{% endif %}
+        </td>
+        <td>
+          {% if item.quantity_change > 0 %}<span class="text-success fw-bold">+{{ item.quantity_change }}</span>{% endif %}
+          {% if item.quantity_change == 0 %}<span class="text-muted">0</span>{% endif %}
+          {% if item.quantity_change < 0 %}<span class="text-danger fw-bold">{{ item.quantity_change }}</span>{% endif %}
+        </td>
+        <td style="font-size:.85rem">{{ item.quantity_before }} → {{ item.quantity_after }}</td>
+        <td>{% if item.status == '成功' %}<span class="badge bg-success-subtle text-success">成功</span>{% else %}<span class="badge bg-danger-subtle text-danger">{{ item.status }}</span>{% endif %}</td>
+        <td class="text-muted" style="font-size:.8rem">{{ item.remark }}</td>
+      </tr>
+      {% endfor %}
+      {% else %}
+      <tr><td colspan="9" class="text-center text-muted py-4">暂无日志记录</td></tr>
+      {% endif %}
+      </tbody>
+    </table>
+  </div>
+  {% if pages > 1 %}
+  <div class="card-body-custom pt-0">
+    <nav><ul class="pagination justify-content-center mb-0">
+      {% for p in range(1, pages + 1) %}
+      <li class="page-item"><a class="page-link" href="?page={{ p }}&search={{ search }}&op_type={{ op_type }}&start_date={{ start_date }}&end_date={{ end_date }}">{{ p }}</a></li>
+      {% endfor %}
+    </ul></nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>登录 - 库存管理系统</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+body{margin:0;min-height:100vh;display:flex;font-family:'Segoe UI',system-ui,sans-serif}
+.login-left{flex:1;background:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);display:flex;align-items:center;justify-content:center;color:#fff;padding:3rem}
+.login-left .content{text-align:center;max-width:400px}
+.login-left .content h1{font-size:2.5rem;font-weight:700;margin-bottom:1rem}
+.login-left .content p{font-size:1.1rem;opacity:.9;line-height:1.6}
+.login-left .features{margin-top:2rem;text-align:left}
+.login-left .features div{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;font-size:.95rem}
+.login-right{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;background:#f8fafc}
+.login-form{width:100%;max-width:400px}
+.login-form h3{font-weight:700;color:#1e293b;margin-bottom:.5rem}
+.login-form .form-control{padding:.75rem 1rem;border-radius:10px;font-size:.95rem}
+.login-form .btn-login{padding:.75rem;border-radius:10px;font-size:1rem;font-weight:600;background:linear-gradient(135deg,#6366f1,#a855f7);border:none}
+.login-form .btn-login:hover{opacity:.9}
+@media(max-width:768px){.login-left{display:none}}
+</style>
+</head>
+<body>
+<div class="login-left">
+  <div class="content">
+    <h1><i class="fas fa-boxes-stacked me-2"></i>库存管理系统</h1>
+    <p>高效、智能的库存管理解决方案<br>支持条码扫描、实时库存追踪</p>
+    <div class="features">
+      <div><i class="fas fa-check-circle"></i> 条码扫描快速入库/出库</div>
+      <div><i class="fas fa-check-circle"></i> 实时库存数据可视化</div>
+      <div><i class="fas fa-check-circle"></i> 完整操作日志追踪</div>
+      <div><i class="fas fa-check-circle"></i> Excel数据导入导出</div>
+    </div>
+  </div>
+</div>
+<div class="login-right">
+  <div class="login-form">
+    <div class="text-center mb-4">
+      <div style="width:60px;height:60px;border-radius:15px;background:linear-gradient(135deg,#6366f1,#a855f7);display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem">
+        <i class="fas fa-boxes-stacked text-white" style="font-size:1.5rem"></i>
+      </div>
+      <h3>欢迎回来</h3>
+      <p class="text-muted">请登录您的账户</p>
+    </div>
+    {% if flash %}
+    <div class="alert alert-{{ flash.0 }} py-2" style="border-radius:10px;font-size:.9rem">{{ flash.1 }}</div>
+    {% endif %}
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label text-muted" style="font-size:.85rem">用户名</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white" style="border-radius:10px 0 0 10px"><i class="fas fa-user text-muted"></i></span>
+          <input type="text" name="username" class="form-control" placeholder="请输入用户名" required autofocus style="border-radius:0 10px 10px 0">
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="form-label text-muted" style="font-size:.85rem">密码</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white" style="border-radius:10px 0 0 10px"><i class="fas fa-lock text-muted"></i></span>
+          <input type="password" name="password" class="form-control" placeholder="请输入密码" required style="border-radius:0 10px 10px 0">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-login btn-primary w-100"><i class="fas fa-sign-in-alt me-2"></i>登 录</button>
+    </form>
+    <p class="text-center text-muted mt-3" style="font-size:.8rem">默认账号: admin / admin123</p>
+  </div>
+</div>
+</body>
+</html>

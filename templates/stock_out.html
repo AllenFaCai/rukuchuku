@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}出库操作{% endblock %}
+{% block breadcrumb %}出库操作{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-custom">
+      <div class="card-header-custom"><h6><i class="fas fa-arrow-up me-2 text-warning"></i>扫码出库</h6></div>
+      <div class="card-body-custom">
+        <form method="POST">
+          <div class="mb-3"><label class="form-label fw-semibold">条码/19码</label><input type="text" name="barcode" id="barcodeInput" class="form-control scanner-input" placeholder="扫码或输入条码..." autofocus autocomplete="off" required></div>
+          <div class="mb-3"><label class="form-label fw-semibold">出库数量</label><input type="number" name="quantity" class="form-control" value="1" min="1" style="border-radius:10px"></div>
+          <button type="submit" class="btn btn-warning btn-lg w-100" style="border-radius:10px"><i class="fas fa-box me-2"></i>确认出库</button>
+        </form>
+      </div>
+    </div>
+    <div class="card-custom mt-3" id="previewCard" style="display:none">
+      <div class="card-body-custom">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:50px;height:50px;border-radius:10px;background:#dbeafe;display:flex;align-items:center;justify-content:center"><i class="fas fa-cube text-primary"></i></div>
+          <div><h6 id="previewName" class="mb-0"></h6><small class="text-muted" id="previewInfo"></small></div>
+          <div class="ms-auto text-end"><div style="font-size:1.25rem;font-weight:700" id="previewQty"></div><small class="text-muted">当前库存</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card-custom">
+      <div class="card-header-custom"><h6><i class="fas fa-info-circle me-2 text-primary"></i>操作说明</h6></div>
+      <div class="card-body-custom">
+        <div class="mb-3 p-3" style="background:#fef3c7;border-radius:10px;border-left:4px solid #f59e0b">
+          <h6 style="color:#f59e0b;font-size:.9rem"><i class="fas fa-lightbulb me-1"></i>出库流程</h6>
+          <p style="font-size:.85rem;margin:0;color:#475569">1. 扫描条码<br>2. 确认数量<br>3. 点击出库</p>
+        </div>
+        <div class="p-3" style="background:#fee2e2;border-radius:10px;border-left:4px solid #ef4444">
+          <h6 style="color:#ef4444;font-size:.9rem"><i class="fas fa-exclamation-circle me-1"></i>注意</h6>
+          <p style="font-size:.85rem;margin:0;color:#475569">出库数量不能超过当前库存</p>
+        </div>
+      </div>
+    </div>
+    {% if result %}
+    {% if result.success %}
+    <div class="card-custom mt-3">
+      <div class="card-body-custom text-center">
+        <div style="width:60px;height:60px;border-radius:50%;background:#fef3c7;display:inline-flex;align-items:center;justify-content:center;margin-bottom:.75rem"><i class="fas fa-check text-warning" style="font-size:1.5rem"></i></div>
+        <h6>{{ result.name }}</h6>
+        <p class="text-muted" style="font-size:.85rem">货号: {{ result.sku }}</p>
+        <div style="font-size:1.5rem;font-weight:700;color:#f59e0b">{{ result.before }} → {{ result.after }}</div>
+        <p class="text-muted" style="font-size:.8rem">出库 -{{ result.qty }} 件</p>
+      </div>
+    </div>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+var bi=document.getElementById('barcodeInput');
+var pc=document.getElementById('previewCard');
+var pn=document.getElementById('previewName');
+var pi=document.getElementById('previewInfo');
+var pq=document.getElementById('previewQty');
+var timer;
+bi.addEventListener('input',function(){
+  clearTimeout(timer);var v=this.value.trim();
+  if(v.length<3){pc.style.display='none';return;}
+  timer=setTimeout(function(){
+    fetch('/api/barcode/'+v).then(function(r){return r.json();}).then(function(d){
+      if(d.found){pn.textContent=d.name;pi.textContent=d.sku+' | '+d.brand+' | '+d.size;pq.textContent=d.quantity;pq.style.color=d.quantity<5?'#ef4444':'#10b981';pc.style.display='block';}
+      else{pc.style.display='none';}
+    });
+  },300);
+});
+</script>
+{% endblock %}

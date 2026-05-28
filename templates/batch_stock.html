@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}批量出入库{% endblock %}
+{% block breadcrumb %}批量出入库{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-custom">
+      <div class="card-header-custom"><h6><i class="fas fa-layer-group me-2 text-primary"></i>批量出入库</h6></div>
+      <div class="card-body-custom">
+        <form method="POST" id="batchForm">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">操作类型</label>
+            <div class="d-flex gap-2">
+              <label class="btn btn-outline-success flex-fill" style="border-radius:10px">
+                <input type="radio" name="mode" value="in" checked class="d-none"> <i class="fas fa-arrow-down me-1"></i>批量入库
+              </label>
+              <label class="btn btn-outline-warning flex-fill" style="border-radius:10px">
+                <input type="radio" name="mode" value="out" class="d-none"> <i class="fas fa-arrow-up me-1"></i>批量出库
+              </label>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">默认数量</label>
+            <input type="number" name="default_qty" class="form-control" value="1" min="1" style="border-radius:10px">
+            <small class="text-muted">每行只写条码时使用此数量。也可在条码后空格加数量，如：<code>6901028001489 5</code></small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">条码列表 <span class="text-danger">*</span></label>
+            <textarea name="barcodes" id="barcodeArea" class="form-control" rows="12" style="border-radius:10px;font-family:monospace;font-size:.9rem" placeholder="每行一个条码，支持格式：&#10;6901028001489&#10;6901028001489 3&#10;6901028001490 2&#10;&#10;可直接用扫码枪连续扫描，条码会自动换行" required></textarea>
+            <div class="d-flex justify-content-between mt-1">
+              <small class="text-muted" id="lineCount">0 个条码</small>
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('barcodeArea').value='';updateCount();" style="font-size:.75rem">清空</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg w-100" style="border-radius:10px">
+            <i class="fas fa-play me-2"></i>开始执行
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card-custom mb-3">
+      <div class="card-header-custom"><h6><i class="fas fa-info-circle me-2 text-primary"></i>使用说明</h6></div>
+      <div class="card-body-custom">
+        <div class="mb-3 p-3" style="background:#f0fdf4;border-radius:10px;border-left:4px solid #10b981">
+          <h6 style="color:#10b981;font-size:.9rem"><i class="fas fa-lightbulb me-1"></i>快速操作</h6>
+          <p style="font-size:.85rem;margin:0;color:#475569">
+            1. 选择入库或出库<br>
+            2. 设置默认数量<br>
+            3. 用扫码枪连续扫描（自动换行）<br>
+            4. 或粘贴多个条码<br>
+            5. 点击"开始执行"
+          </p>
+        </div>
+        <div class="p-3" style="background:#eff6ff;border-radius:10px;border-left:4px solid #3b82f6">
+          <h6 style="color:#3b82f6;font-size:.9rem"><i class="fas fa-keyboard me-1"></i>自定义数量</h6>
+          <p style="font-size:.85rem;margin:0;color:#475569">
+            每行格式：<code>条码 数量</code><br>
+            例如：<code>6901028001489 5</code><br>
+            表示该条码出入库 5 件
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {% if result %}
+    <div class="card-custom">
+      <div class="card-header-custom">
+        <h6><i class="fas fa-check-circle me-2 text-success"></i>执行结果</h6>
+        <span class="badge {% if result.fail == 0 %}bg-success{% else %}bg-warning{% endif %}">
+          成功 {{ result.success }} / 失败 {{ result.fail }}
+        </span>
+      </div>
+      <div class="card-body-custom p-0" style="max-height:400px;overflow-y:auto">
+        <table class="table table-custom">
+          <thead><tr><th>条码</th><th>商品</th><th>数量</th><th>库存变化</th><th>状态</th></tr></thead>
+          <tbody>
+          {% for r in result.results %}
+          <tr>
+            <td><code>{{ r.barcode }}</code></td>
+            <td style="font-size:.8rem">{{ r.name }}</td>
+            <td>
+              {% if result.mode == 'in' %}<span class="text-success">+{{ r.qty }}</span>{% endif %}
+              {% if result.mode == 'out' %}<span class="text-danger">-{{ r.qty }}</span>{% endif %}
+            </td>
+            <td style="font-size:.8rem">
+              {% if r.status == 'ok' %}{{ r.before }} → {{ r.after }}{% else %}-{% endif %}
+            </td>
+            <td>
+              {% if r.status == 'ok' %}<span class="badge bg-success">成功</span>{% else %}<span class="badge bg-danger">{{ r.msg }}</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+var ta=document.getElementById('barcodeArea');
+var lc=document.getElementById('lineCount');
+function updateCount(){
+  var lines=ta.value.split('\n').filter(function(l){return l.trim();});
+  lc.textContent=lines.length+' 个条码';
+}
+ta.addEventListener('input',updateCount);
+// 扫码枪输入自动聚焦
+ta.focus();
+// 切换按钮样式
+document.querySelectorAll('input[name=mode]').forEach(function(radio){
+  radio.addEventListener('change',function(){
+    document.querySelectorAll('input[name=mode]').forEach(function(r){
+      r.parentElement.classList.remove('btn-success','btn-warning');
+      r.parentElement.classList.add(r.value==='in'?'btn-outline-success':'btn-outline-warning');
+    });
+    this.parentElement.classList.remove('btn-outline-success','btn-outline-warning');
+    this.parentElement.classList.add(this.value==='in'?'btn-success':'btn-warning');
+  });
+});
+// 初始化选中状态
+document.querySelector('input[name=mode][value=in]').parentElement.classList.remove('btn-outline-success');
+document.querySelector('input[name=mode][value=in]').parentElement.classList.add('btn-success');
+</script>
+{% endblock %}

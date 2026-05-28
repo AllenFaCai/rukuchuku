@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}仪表盘{% endblock %}
+{% block breadcrumb %}数据仪表盘{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><div class="stat-label mb-1">产品总数</div><div class="stat-value">{{ stats.total_products }}</div></div>
+        <div class="stat-icon" style="background:rgba(99,102,241,.1);color:#6366f1"><i class="fas fa-cube"></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><div class="stat-label mb-1">库存总量</div><div class="stat-value">{{ stats.total_stock }}</div></div>
+        <div class="stat-icon" style="background:rgba(16,185,129,.1);color:#10b981"><i class="fas fa-boxes-stacked"></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><div class="stat-label mb-1">今日操作</div><div class="stat-value">{{ stats.today_scans }}</div></div>
+        <div class="stat-icon" style="background:rgba(245,158,11,.1);color:#f59e0b"><i class="fas fa-chart-line"></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><div class="stat-label mb-1">低库存预警</div><div class="stat-value text-danger">{{ stats.low_stock }}</div></div>
+        <div class="stat-icon" style="background:rgba(239,68,68,.1);color:#ef4444"><i class="fas fa-exclamation-triangle"></i></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="stat-card text-center"><div class="stat-label">今日入库</div><div class="stat-value" style="color:#10b981">{{ stats.today_in }}</div></div></div>
+  <div class="col-md-4"><div class="stat-card text-center"><div class="stat-label">今日出库</div><div class="stat-value" style="color:#f59e0b">{{ stats.today_out }}</div></div></div>
+  <div class="col-md-4"><div class="stat-card text-center"><div class="stat-label">日志总条数</div><div class="stat-value">{{ stats.total_logs }}</div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-custom">
+      <div class="card-header-custom">
+        <h6><i class="fas fa-clock-rotate-left me-2 text-primary"></i>最近操作</h6>
+        <a href="/logs" class="btn btn-sm btn-outline-primary" style="font-size:.8rem;border-radius:8px">查看全部</a>
+      </div>
+      <div class="card-body-custom p-0">
+        {% if recent_logs %}
+        <table class="table table-custom">
+          <thead><tr><th>时间</th><th>条码</th><th>商品</th><th>类型</th><th>变动</th><th>状态</th></tr></thead>
+          <tbody>
+          {% for log in recent_logs %}
+          <tr>
+            <td class="text-muted" style="font-size:.8rem">{{ log.created_at }}</td>
+            <td><code>{{ log.barcode }}</code></td>
+            <td>{{ log.product_name }}</td>
+            <td>
+              {% if log.operation_type == '入库' %}<span class="badge bg-success-subtle text-success">入库</span>{% endif %}
+              {% if log.operation_type == '手动入库' %}<span class="badge bg-success-subtle text-success">手动入库</span>{% endif %}
+              {% if log.operation_type == '出库' %}<span class="badge bg-warning-subtle text-warning">出库</span>{% endif %}
+              {% if log.operation_type == '库存调整' %}<span class="badge bg-info-subtle text-info">调整</span>{% endif %}
+            </td>
+            <td>
+              {% if log.quantity_change > 0 %}<span class="text-success">+{{ log.quantity_change }}</span>{% endif %}
+              {% if log.quantity_change == 0 %}<span class="text-muted">0</span>{% endif %}
+              {% if log.quantity_change < 0 %}<span class="text-danger">{{ log.quantity_change }}</span>{% endif %}
+            </td>
+            <td><span class="badge bg-success-subtle text-success">{{ log.status }}</span></td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state py-4"><i class="fas fa-inbox"></i><p>暂无操作记录</p></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card-custom mb-3">
+      <div class="card-header-custom"><h6><i class="fas fa-tags me-2 text-primary"></i>产品分类</h6></div>
+      <div class="card-body-custom">
+        {% if categories %}
+        {% for cat in categories %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span style="font-size:.85rem">{{ cat.category }}</span>
+          <span class="badge bg-primary-subtle text-primary">{{ cat.count }}</span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted text-center" style="font-size:.85rem">暂无分类数据</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card-custom">
+      <div class="card-header-custom"><h6><i class="fas fa-exclamation-triangle me-2 text-warning"></i>低库存预警</h6></div>
+      <div class="card-body-custom">
+        {% if low_stock_items %}
+        {% for item in low_stock_items %}
+        <div class="d-flex justify-content-between align-items-center mb-2 p-2" style="background:#fef3c7;border-radius:8px">
+          <div><div style="font-size:.85rem;font-weight:500">{{ item.name }}</div><small class="text-muted">{{ item.sku }}</small></div>
+          <span class="badge bg-danger">{{ item.quantity }}</span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted text-center" style="font-size:.85rem">库存充足</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
